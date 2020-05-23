@@ -4,6 +4,6 @@ import java.io.IOException;
 
 public class MessageFormatException extends IOException {
     public MessageFormatException(String message) {
-        super(message);
+        super(String.format("%d:%s", message.length(), message));
     }
 }

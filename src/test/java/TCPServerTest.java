@@ -62,7 +62,7 @@ public class TCPServerTest {
 
         final StringBuilder sb = getServerResponse();
 
-        assertEquals("The message provided by client: 8asdas5 is not valid, it must follow the pattern '<query length>:query'", sb.toString());
+        assertEquals("103:The message provided by client: 8asdas5 is not valid, it must follow the pattern '<query length>:query'", sb.toString());
     }
 
     @Test
@@ -78,7 +78,7 @@ public class TCPServerTest {
 
         final StringBuilder sb = getServerResponse();
 
-        assertEquals("The query length provided is not valid", sb.toString());
+        assertEquals("38:The query length provided is not valid", sb.toString());
     }
 
 
