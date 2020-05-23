@@ -3,6 +3,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class TCPServer implements Runnable {
@@ -60,8 +61,10 @@ public class TCPServer implements Runnable {
 
     private void openServerSocket() {
         try {
+
             this.serverSocket = new ServerSocket(this.serverPort);
         } catch (IOException e) {
+            logger.log(Level.WARNING, String.format("Cannot open port %d", this.serverPort), e);
             throw new RuntimeException(String.format("Cannot open port %d", this.serverPort), e);
         }
     }

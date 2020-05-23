@@ -8,6 +8,7 @@ import services.interfaces.MovieService;
 import javax.inject.Inject;
 import java.io.*;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -58,7 +59,6 @@ public class TCPResquestHandler implements Runnable {
             output.write(responsePayload.toString().getBytes());
             output.close();
             input.close();
-
             logger.info(String.format("Message was successfully processed for the client: %s", clientSocket.getRemoteSocketAddress()));
         } catch (IOException e) {
             logger.log(Level.SEVERE, "An Error occurred while processind the client request", e);
@@ -81,9 +81,12 @@ public class TCPResquestHandler implements Runnable {
         if (requestString == null || !requestString.matches("(\\d+:.*)"))
             throw new MessageFormatException(String.format("The message provided by client: %s is not valid, it must follow the pattern '<query length>:query'", requestString));
 
-        final String[] splitString = requestString.split(":");
+        final String[] splitString = requestString.split(":", 2);
 
-        Payload payload = new Payload(Integer.valueOf(splitString[0]), splitString[1]);
+        final Payload payload = new Payload();
+
+        payload.setContentLength(Integer.valueOf(splitString[0]));
+        payload.setContent(splitString[1]);
 
         if (payload.getContent().length() != payload.getContentLength())
             throw new MessageFormatException("The query length provided is not valid");

@@ -1,5 +1,4 @@
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -12,23 +11,34 @@ import static org.junit.Assert.assertTrue;
 
 public class TCPServerTest {
 
-    TCPServer server;
-    Socket client;
+    static TCPServer server;
+    static Socket client;
+
+    @BeforeClass
+    public static void init() throws IOException {
+        server = new TCPServer(8085);
+        new Thread(server).start();
+    }
 
     @Before
-    public void init() throws IOException {
-        this.server = new TCPServer(9000);
+    public void beforeEach() throws IOException {
+        client = new Socket("127.0.0.1", 8085);
+    }
 
-        new Thread(server).start();
+    @After
+    public void finalize() throws IOException {
+        client.close();
+    }
 
-        client = new Socket("127.0.0.1", 9000);
-
+    @AfterClass
+    public static void afterClass() {
+        server.stop();
     }
 
     @Test
-    public void shoudMatchtoResponsePattern() throws IOException {
+    public void shoudMatchToResponsePattern() throws IOException {
 
-        final String query = "test";
+        final String query = "teste";
 
         final String message = String.format("%d:%s", query.getBytes().length, query);
 
@@ -40,7 +50,7 @@ public class TCPServerTest {
     }
 
     @Test
-    public void shoudMatchtoResponseinvalidMessagePatternErro() throws IOException {
+    public void shoudMatchToResponseinvalidMessagePatternErro() throws IOException {
 
         final String query = "teste";
 
@@ -56,7 +66,7 @@ public class TCPServerTest {
     }
 
     @Test
-    public void shoudMatchtoResponseinvalidQueryLengthErro() throws IOException {
+    public void shoudMatchToResponseinvalidQueryLengthErro() throws IOException {
 
         final String query = "teste";
 
@@ -84,7 +94,7 @@ public class TCPServerTest {
         final StringBuilder sb = new StringBuilder();
         String line;
 
-        while((line = br.readLine())!=null){
+        while ((line = br.readLine()) != null) {
             sb.append(line);
         }
         return sb;
