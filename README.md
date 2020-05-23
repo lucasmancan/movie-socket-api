@@ -11,8 +11,8 @@ All the request must respect the text protocol  (query length):(query)
 
 ##### Example:
 
-Request payload: 5:teste
-Response payload: 3000:Movie 1\nMovie 2\n....
+* Request payload: 5:teste
+* Response payload: 3000:Movie 1\nMovie 2\n....
 
 ### Technologies Used
 
@@ -24,7 +24,7 @@ Response payload: 3000:Movie 1\nMovie 2\n....
  * Mockito
  
  
- ###Author
+ ### Author
  Lucas Frederico Mançan(lucasfmancan@gmail.com)
  
  ##### References
