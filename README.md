@@ -8,10 +8,8 @@ All the request must respect the text protocol  (query length):(query)
 
 * query length : Size of request/response content
 * query : Request/response content
-
-
-####### Default port 8085
-####### Execution 'java -jar movie-socket-api-1.0.jar'
+* Default port 8085
+* Execution 'java -jar movie-socket-api-1.0.jar'
 
 ##### Example:
 
