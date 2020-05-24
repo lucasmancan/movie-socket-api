@@ -1,30 +1,31 @@
-import com.google.inject.Guice;
+package services;
+
 import exceptions.MessageFormatException;
 import models.MovieOption;
 import models.Payload;
-import modules.DIModule;
 import services.interfaces.MovieService;
+import services.interfaces.TCPResquestHandler;
 
 import javax.inject.Inject;
+import javax.inject.Singleton;
 import java.io.*;
 import java.net.Socket;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
+public class TCPResquestHandlerImpl implements TCPResquestHandler {
 
-public class TCPResquestHandler implements Runnable {
+    static Logger logger = Logger.getLogger(TCPResquestHandlerImpl.class.getName());
 
-    static Logger logger = Logger.getLogger(TCPResquestHandler.class.getName());
+    private  Socket clientSocket;
 
-    private final Socket clientSocket;
+    private final MovieService movieService;
 
-    private MovieService movieService;
-
-    public TCPResquestHandler(Socket clientSocket) {
-        this.clientSocket = clientSocket;
-        this.movieService = Guice.createInjector(new DIModule()).getInstance(MovieService.class);
+    @Inject
+    public TCPResquestHandlerImpl(MovieService movieService) {
+//        this.clientSocket = clientSocket;
+        this.movieService = movieService;
     }
 
     /**
@@ -59,7 +60,7 @@ public class TCPResquestHandler implements Runnable {
             output.write(responsePayload.toString().getBytes());
             output.close();
             input.close();
-            logger.info(String.format("Message was successfully processed for the client: %s", clientSocket.getRemoteSocketAddress()));
+            logger.fine(String.format("Message was successfully processed for the client: %s", clientSocket.getRemoteSocketAddress()));
         } catch (IOException e) {
             logger.log(Level.SEVERE, "An Error occurred while processind the client request", e);
         }
@@ -119,5 +120,10 @@ public class TCPResquestHandler implements Runnable {
         }
 
         return requestString;
+    }
+
+    @Override
+    public void setClientSocket(Socket clientSocket) {
+        this.clientSocket = clientSocket;
     }
 }

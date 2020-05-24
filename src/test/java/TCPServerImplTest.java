@@ -1,4 +1,8 @@
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import modules.DIModule;
 import org.junit.*;
+import services.interfaces.TCPServer;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -9,30 +13,39 @@ import java.net.Socket;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-public class TCPServerTest {
+public class TCPServerImplTest {
 
     static TCPServer server;
-    static Socket client;
+    Socket client;
 
     @BeforeClass
     public static void init() throws IOException {
-        server = new TCPServer(8085);
+
+        Injector injector = Guice.createInjector(new DIModule());
+
+        server = injector.getInstance(TCPServer.class);
+
+        server.setPort(9000);
+
         new Thread(server).start();
+
     }
+
+
+    @AfterClass
+    public static void afterClass() {
+        server.stop();
+    }
+
 
     @Before
     public void beforeEach() throws IOException {
-        client = new Socket("127.0.0.1", 8085);
+        client = new Socket("127.0.0.1", 9000);
     }
 
     @After
     public void finalize() throws IOException {
         client.close();
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        server.stop();
     }
 
     @Test

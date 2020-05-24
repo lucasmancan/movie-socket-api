@@ -1,11 +1,22 @@
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import modules.DIModule;
+import services.TCPResquestHandlerImpl;
+import services.TCPServerImpl;
+import services.interfaces.TCPServer;
+
 import java.util.Scanner;
 
 public class Main {
 
     public static void main(String[] args){
 
-        TCPServer server = new TCPServer(8085);
-        new Thread(server).start();
+        Injector injector = Guice.createInjector(new DIModule());
+
+        TCPServer tcpServer = injector.getInstance(TCPServer.class);
+        tcpServer.setPort(8085);
+
+        new Thread(tcpServer).start();
 
         System.out.println("Press any key to stop de TCP server...");
 
@@ -13,6 +24,6 @@ public class Main {
 
         scanner.next();
 
-        server.stop();
+        tcpServer.stop();
     }
 }
