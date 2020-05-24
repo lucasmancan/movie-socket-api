@@ -7,7 +7,6 @@ import services.interfaces.MovieService;
 import services.interfaces.TCPResquestHandler;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.*;
 import java.net.Socket;
 import java.util.logging.Level;
@@ -18,37 +17,22 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
 
     static Logger logger = Logger.getLogger(TCPResquestHandlerImpl.class.getName());
 
-    private  Socket clientSocket;
+    private Socket clientSocket;
 
     private final MovieService movieService;
 
     @Inject
     public TCPResquestHandlerImpl(MovieService movieService) {
-//        this.clientSocket = clientSocket;
         this.movieService = movieService;
     }
 
     /**
-     * Deals with client resquest
+     * Deals with client resquest and query MovieService
      */
     public void run() {
         try {
 
-            InputStream input = clientSocket.getInputStream();
-            OutputStream output = clientSocket.getOutputStream();
-
-            Payload requestPayload = null;
-
-            try{
-                requestPayload = getRequestPayload(input);
-            }catch (MessageFormatException messageFormatException){
-
-                output.write(messageFormatException.getMessage().getBytes());
-                output.close();
-                input.close();
-
-                throw messageFormatException;
-            }
+            Payload requestPayload = getRequestPayload();
 
             final String responseContent = movieService.findAllByTitle(requestPayload.getContent())
                     .stream()
@@ -57,11 +41,50 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
 
             final Payload responsePayload = new Payload(responseContent.length(), responseContent);
 
-            output.write(responsePayload.toString().getBytes());
-            output.close();
-            input.close();
-            logger.fine(String.format("Message was successfully processed for the client: %s", clientSocket.getRemoteSocketAddress()));
+            sendMessage(responsePayload.toString());
+
         } catch (IOException e) {
+            handleError(e);
+        } finally {
+            close();
+        }
+    }
+
+    /**
+     * Closes socket connection
+     */
+    private void close() {
+        try{
+            this.clientSocket.close();
+        }catch (IOException e){
+            logger.severe("Error occurred while trying to close socket connection..");
+        }
+    }
+
+    /**
+     * Send message to socket client
+     *
+     * @param message
+     * @return
+     * @throws IOException
+     */
+    private void sendMessage(String message) throws IOException {
+        OutputStream output = clientSocket.getOutputStream();
+        output.write(message.getBytes());
+    }
+
+    /**
+     * Handle a friendly error to socket client
+     *
+     * @param ex
+     */
+    public void handleError(IOException ex) {
+        try {
+            OutputStream output = clientSocket.getOutputStream();
+
+            output.write(ex.getMessage().getBytes());
+
+        } catch (Exception e) {
             logger.log(Level.SEVERE, "An Error occurred while processind the client request", e);
         }
     }
@@ -69,14 +92,13 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
     /**
      * Cast InputStream to a common format 'models.Payload'
      *
-     * @param input
      * @return
      * @throws IOException if the client message does not follow the patter '<query length>:query'
      *                     or the 'query length' is not the real length of 'query' property
      */
-    private Payload getRequestPayload(InputStream input) throws MessageFormatException {
+    private Payload getRequestPayload() throws IOException {
 
-        final String requestString = toString(input);
+        final String requestString = clientInputStreamToString();
 
         /* Regex validates the pattern: '<query length>:query'*/
         if (requestString == null || !requestString.matches("(\\d+:.*)"))
@@ -96,15 +118,15 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
     }
 
     /**
-     *
-     * @param input client connection data
+     * @param
      * @return message sent by client in String format or null
      */
-    private String toString(InputStream input)  {
-
+    private String clientInputStreamToString() {
         String requestString = null;
 
         try {
+            InputStream input = clientSocket.getInputStream();
+
             InputStreamReader isReader = new InputStreamReader(input);
             BufferedReader br = new BufferedReader(isReader);
 
@@ -115,7 +137,7 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
             }
 
             requestString = sb.toString();
-        }catch (IOException ex){
+        } catch (IOException ex) {
             return null;
         }
 

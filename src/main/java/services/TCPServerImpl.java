@@ -16,8 +16,7 @@ import java.util.logging.Logger;
 public class TCPServerImpl implements TCPServer {
     static Logger logger = Logger.getLogger(TCPServerImpl.class.getName());
 
-
-    private TCPResquestHandler resquestHandler;
+    private  TCPResquestHandler resquestHandler;
 
     @Inject
     public TCPServerImpl(TCPResquestHandler resquestHandler) {
