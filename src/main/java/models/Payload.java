@@ -1,7 +1,7 @@
 package models;
 
 public class Payload {
-    private Integer contentLength;
+    private Integer contentLength = 0;
     private String content;
 
     @Override

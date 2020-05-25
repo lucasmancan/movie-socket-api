@@ -6,15 +6,29 @@ This application is a TCP Server that queries the https://www.imdb.com/ web site
 
 All the request must respect the text protocol  (query length):(query)
 
-* query length : Size of request/response content
-* query : Request/response content
-* Default port 8085
+* query length : number that represents the size of request/response content
+* query : Request/response content text
+* Default port 8085 (I dont want to conflict with your running process on 8080 ;) ) 
 * Execution 'java -jar movie-socket-api-1.0.jar'
 
 ##### Example:
 
 * Request payload: 5:teste
 * Response payload: 3000:Movie 1\nMovie 2\n....
+
+###### How to Debug?
+
+* git clone https://github.com/lucasmancan/movie-socket-api.git.
+* Open the project in your favorite IDEA or go to the project directory and use maven lifecycle manualy to install dependencies and generate build file.
+* Run the project in your IDE or use javac
+
+##### Testing...
+ - Run 'mvn test'
+ - open your windows terminal and type 'telnet localhost 8085'
+ - Now that the connection is open, input the size of title and then type the title  you want. (You should respect the text protocol present in details section)
+ - The program should now give you a list of related titles and close your connection.
+
+
 
 ### Technologies Used
 
@@ -23,7 +37,6 @@ All the request must respect the text protocol  (query length):(query)
  * Jsoup (HTML parser)
  * Guice (Simple DI Framework)
  * Junit
- * Mockito
  
  
  ### Author

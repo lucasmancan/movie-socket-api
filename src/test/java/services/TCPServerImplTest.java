@@ -1,3 +1,5 @@
+package services;
+
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import modules.DIModule;
@@ -10,7 +12,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
-import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TCPServerImplTest {
@@ -19,7 +20,7 @@ public class TCPServerImplTest {
     Socket client;
 
     @BeforeClass
-    public static void init() throws IOException {
+    public static void init() {
 
         Injector injector = Guice.createInjector(new DIModule());
 
@@ -51,7 +52,7 @@ public class TCPServerImplTest {
     @Test
     public void shoudMatchToResponsePattern() throws IOException {
 
-        final String query = "teste";
+        final String query = "teste/*-a'";
 
         final String message = String.format("%d:%s", query.getBytes().length, query);
 
@@ -61,39 +62,6 @@ public class TCPServerImplTest {
 
         assertTrue(sb.toString().matches("(\\d+:.*)"));
     }
-
-    @Test
-    public void shoudMatchToResponseinvalidMessagePatternErro() throws IOException {
-
-        final String query = "teste";
-
-
-        /*Invalid Message format*/
-        final String message = String.format("8asdas%s", query.getBytes().length, query);
-
-        sendMessageToServer(message);
-
-        final StringBuilder sb = getServerResponse();
-
-        assertEquals("103:The message provided by client: 8asdas5 is not valid, it must follow the pattern '<query length>:query'", sb.toString());
-    }
-
-    @Test
-    public void shoudMatchToResponseinvalidQueryLengthErro() throws IOException {
-
-        final String query = "teste";
-
-
-        /*Invalid query length*/
-        final String message = String.format("56:%s", query.getBytes().length, query);
-
-        sendMessageToServer(message);
-
-        final StringBuilder sb = getServerResponse();
-
-        assertEquals("38:The query length provided is not valid", sb.toString());
-    }
-
 
     private void sendMessageToServer(String message) throws IOException {
         OutputStream output = client.getOutputStream();
@@ -110,6 +78,7 @@ public class TCPServerImplTest {
         while ((line = br.readLine()) != null) {
             sb.append(line);
         }
+
         return sb;
     }
 }

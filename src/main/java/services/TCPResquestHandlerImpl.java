@@ -9,6 +9,7 @@ import services.interfaces.TCPResquestHandler;
 import javax.inject.Inject;
 import java.io.*;
 import java.net.Socket;
+import java.util.Optional;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.stream.Collectors;
@@ -45,18 +46,19 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
 
         } catch (IOException e) {
             handleError(e);
-        } finally {
+        }finally {
             close();
         }
     }
 
     /**
-     * Closes socket connection
+     * Closes the client socket connection
+     * After query movies list server will stop client connection
      */
     private void close() {
-        try{
+        try {
             this.clientSocket.close();
-        }catch (IOException e){
+        } catch (IOException e) {
             logger.severe("Error occurred while trying to close socket connection..");
         }
     }
@@ -69,8 +71,9 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
      * @throws IOException
      */
     private void sendMessage(String message) throws IOException {
-        OutputStream output = clientSocket.getOutputStream();
-        output.write(message.getBytes());
+        PrintWriter out = new PrintWriter(clientSocket.getOutputStream(), true);
+        out.println(message);
+        out.println('\n');
     }
 
     /**
@@ -93,26 +96,17 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
      * Cast InputStream to a common format 'models.Payload'
      *
      * @return
-     * @throws IOException if the client message does not follow the patter '<query length>:query'
-     *                     or the 'query length' is not the real length of 'query' property
      */
-    private Payload getRequestPayload() throws IOException {
+    private Payload getRequestPayload() {
 
-        final String requestString = clientInputStreamToString();
-
-        /* Regex validates the pattern: '<query length>:query'*/
-        if (requestString == null || !requestString.matches("(\\d+:.*)"))
-            throw new MessageFormatException(String.format("The message provided by client: %s is not valid, it must follow the pattern '<query length>:query'", requestString));
-
-        final String[] splitString = requestString.split(":", 2);
+        final Optional<String> requestString = clientInputStreamToString();
 
         final Payload payload = new Payload();
 
-        payload.setContentLength(Integer.valueOf(splitString[0]));
-        payload.setContent(splitString[1]);
-
-        if (payload.getContent().length() != payload.getContentLength())
-            throw new MessageFormatException("The query length provided is not valid");
+        if (requestString.isPresent()) {
+            payload.setContentLength(requestString.get().getBytes().length);
+            payload.setContent(requestString.get());
+        }
 
         return payload;
     }
@@ -121,27 +115,42 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
      * @param
      * @return message sent by client in String format or null
      */
-    private String clientInputStreamToString() {
+    private Optional<String> clientInputStreamToString() {
         String requestString = null;
 
         try {
-            InputStream input = clientSocket.getInputStream();
 
-            InputStreamReader isReader = new InputStreamReader(input);
-            BufferedReader br = new BufferedReader(isReader);
+            int incoming = clientSocket.getInputStream().read();
 
-            final StringBuilder sb = new StringBuilder();
+            StringBuilder queryContentSb = new StringBuilder();
+            StringBuilder queryLengthSb = new StringBuilder();
 
-            while (br.ready()) {
-                sb.append((char) br.read());
+            int queryLength = -1;
+
+            while (incoming != -1) {
+                char c = (char) incoming;
+
+                if (c == ':') {
+                    queryLength = Integer.parseInt(queryLengthSb.toString());
+                } else if (queryLength > -1) {
+                    queryContentSb.append(c);
+                } else if (queryLength == -1 && Character.isDigit(c)) {
+                    queryLengthSb.append(c);
+                }
+
+                if (queryContentSb.length() == queryLength)
+                    break;
+
+                incoming = clientSocket.getInputStream().read();
+
             }
 
-            requestString = sb.toString();
+            requestString = queryContentSb.toString();
         } catch (IOException ex) {
-            return null;
+            return Optional.empty();
         }
 
-        return requestString;
+        return Optional.of(requestString);
     }
 
     @Override

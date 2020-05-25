@@ -4,7 +4,6 @@ import services.interfaces.TCPResquestHandler;
 import services.interfaces.TCPServer;
 
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -36,22 +35,21 @@ public class TCPServerImpl implements TCPServer {
         }
 
         openServerSocket();
+
         while(!isStopped()){
-            Socket clientSocket = null;
             try {
-                clientSocket = this.serverSocket.accept();
+                Socket clientSocket = this.serverSocket.accept();
+
+                resquestHandler.setClientSocket(clientSocket);
+
+                this.threadPool.execute(resquestHandler);
+
             } catch (IOException e) {
                 if(isStopped()) {
                     break;
                 }
-                throw new RuntimeException(
-                        "Error accepting client connection", e);
+                throw new RuntimeException("Error accepting client connection", e);
             }
-
-
-            resquestHandler.setClientSocket(clientSocket);
-
-            this.threadPool.execute(resquestHandler);
         }
         this.threadPool.shutdown();
     }

@@ -7,6 +7,9 @@ import org.jsoup.nodes.Document;
 import services.interfaces.MovieService;
 
 import java.io.IOException;
+import java.net.URI;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -18,12 +21,14 @@ public class MovieServiceImpl implements MovieService {
 
     public List<MovieOption> findAllByTitle(String queryString) throws IOException {
 
-           Document doc = Jsoup.connect(String.format(baseUrl, queryString)).get();
+        queryString = URLEncoder.encode(queryString, "UTF-8");
 
-           // current path of movie information
-           return doc.select(".findSection .findList .findResult .result_text a")
-                   .stream()
-                   .map(element -> new MovieOption(element.text()))
-                   .collect(Collectors.toList());
+        Document doc = Jsoup.connect(String.format(baseUrl, queryString)).get();
+
+        // current path of movie information
+        return doc.select(".findSection .findList .findResult .result_text a")
+                .stream()
+                .map(element -> new MovieOption(element.text()))
+                .collect(Collectors.toList());
     }
 }
