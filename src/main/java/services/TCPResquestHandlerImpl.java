@@ -46,7 +46,7 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
 
         } catch (IOException e) {
             handleError(e);
-        }finally {
+        } finally {
             close();
         }
     }
@@ -79,6 +79,7 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
     /**
      * Handle a friendly error to socket client
      * For now a default message is sent
+     *
      * @param ex
      */
     public void handleError(IOException ex) {
@@ -99,7 +100,7 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
      *
      * @return
      */
-    private Payload getRequestPayload() {
+    private Payload getRequestPayload() throws IOException {
 
         final Optional<String> requestString = clientInputStreamToString();
 
@@ -117,40 +118,49 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
      * @param
      * @return message sent by client in String format or null
      */
-    private Optional<String> clientInputStreamToString() {
+    private Optional<String> clientInputStreamToString() throws IOException {
         String requestString = null;
 
-        try {
+        int incoming = clientSocket.getInputStream().read();
 
-            int incoming = clientSocket.getInputStream().read();
+        StringBuilder queryContentSb = new StringBuilder();
+        StringBuilder queryLengthSb = new StringBuilder();
 
-            StringBuilder queryContentSb = new StringBuilder();
-            StringBuilder queryLengthSb = new StringBuilder();
+        long queryLength = -1;
 
-            int queryLength = -1;
+        while (incoming != -1) {
+            char c = (char) incoming;
 
-            while (incoming != -1) {
-                char c = (char) incoming;
-
+            try {
                 if (c == ':') {
-                    queryLength = Integer.parseInt(queryLengthSb.toString());
+                    queryLength = Long.parseLong(queryLengthSb.toString());
                 } else if (queryLength > -1) {
                     queryContentSb.append(c);
-                } else if (queryLength == -1 && Character.isDigit(c)) {
+                } else if (queryLength == -1) {
+
+                    if (!Character.isDigit(c)) {
+                        throw new MessageFormatException("The server language is <query length>:query, please rewrite your message...");
+                    }
+
                     queryLengthSb.append(c);
                 }
+            } catch (MessageFormatException e) {
 
-                if (queryContentSb.length() == queryLength)
-                    break;
+                queryContentSb.setLength(0);
+                queryLengthSb.setLength(0);
 
-                incoming = clientSocket.getInputStream().read();
-
+                sendMessage(e.getMessage());
             }
 
-            requestString = queryContentSb.toString();
-        } catch (IOException ex) {
-            return Optional.empty();
+            if (queryContentSb.length() == queryLength)
+                break;
+
+            incoming = clientSocket.getInputStream().read();
+
         }
+
+        requestString = queryContentSb.toString();
+
 
         return Optional.of(requestString);
     }
