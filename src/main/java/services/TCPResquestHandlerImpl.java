@@ -86,8 +86,6 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
         try {
             OutputStream output = clientSocket.getOutputStream();
 
-//            final String errorMessage = "%d:An error occurred while processing your request, please check if you are following the protocol";
-
             output.write(ex.getMessage().getBytes());
 
         } catch (Exception e) {
