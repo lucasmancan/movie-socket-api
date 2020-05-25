@@ -40,7 +40,7 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
                     .map(MovieOption::getName)
                     .collect(Collectors.joining("\n"));
 
-            final Payload responsePayload = new Payload(responseContent.length(), responseContent);
+            final Payload responsePayload = new Payload((long) responseContent.length(), responseContent);
 
             sendMessage(responsePayload.toString());
 
@@ -107,7 +107,7 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
         final Payload payload = new Payload();
 
         if (requestString.isPresent()) {
-            payload.setContentLength(requestString.get().getBytes().length);
+            payload.setContentLength((long) requestString.get().getBytes().length);
             payload.setContent(requestString.get());
         }
 
@@ -133,7 +133,7 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
 
             try {
                 if (c == ':') {
-                    queryLength = Long.parseLong(queryLengthSb.toString());
+                    queryLength = parseToLong(queryLengthSb.toString());
                 } else if (queryLength > -1) {
                     queryContentSb.append(c);
                 } else if (queryLength == -1) {
@@ -163,6 +163,14 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
 
 
         return Optional.of(requestString);
+    }
+
+    private Long parseToLong(String queryLength) throws MessageFormatException {
+        try {
+            return Long.parseLong(queryLength);
+        } catch (NumberFormatException e) {
+            throw new MessageFormatException("The <query length> is out of 'Long' range, please rewrite your message...");
+        }
     }
 
     @Override

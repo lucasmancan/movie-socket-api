@@ -1,7 +1,7 @@
 package models;
 
 public class Payload {
-    private Integer contentLength = 0;
+    private Long contentLength = 0L;
     private String content;
 
     @Override
@@ -9,7 +9,7 @@ public class Payload {
         return String.format("%d:%s", this.contentLength, this.content);
     }
 
-    public Payload(Integer contentLength, String content) {
+    public Payload(Long contentLength, String content) {
         this.contentLength = contentLength;
         this.content = content;
     }
@@ -18,11 +18,11 @@ public class Payload {
 
     }
 
-    public Integer getContentLength() {
+    public Long getContentLength() {
         return contentLength;
     }
 
-    public void setContentLength(Integer contentLength) {
+    public void setContentLength(Long contentLength) {
         this.contentLength = contentLength;
     }
 
