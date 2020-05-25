@@ -82,7 +82,7 @@ public class TCPServerImplTest {
     @Test
     public void shoudMatchToResponsePatternInvalidQueryLength() throws IOException {
 
-        final String query = "12312312as1231213:12asdasasdasdas";
+        final String query = "1231231212312312312312312312312:12asdasasdasdas";
 
         final String message = String.format("%da:%s", query.getBytes().length, query);
 
@@ -90,7 +90,7 @@ public class TCPServerImplTest {
 
         final StringBuilder sb = getServerResponse();
 
-        assertEquals("90:The <query length> is out of 'Long' range and is not valid, please rewrite your message...", sb.toString());
+        assertEquals("89:The <query length> is out of 'int' range and is not valid, please rewrite your message...", sb.toString());
     }
 
     @Test
