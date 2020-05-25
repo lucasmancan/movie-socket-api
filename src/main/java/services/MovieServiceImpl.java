@@ -22,7 +22,7 @@ public class MovieServiceImpl implements MovieService {
     public List<MovieOption> findAllByTitle(String queryString) throws IOException {
 
         /*
-        * Jsoup caries about URL encoding
+        * Jsoup takes care of URL encoding
         * */
         Document doc = Jsoup.connect(String.format(baseUrl, queryString)).get();
 
