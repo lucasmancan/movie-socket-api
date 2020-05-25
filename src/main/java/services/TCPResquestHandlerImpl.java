@@ -40,7 +40,7 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
                     .map(MovieOption::getName)
                     .collect(Collectors.joining("\n"));
 
-            final Payload responsePayload = new Payload(responseContent.length(), responseContent);
+            final Payload responsePayload = new Payload(responseContent);
 
             sendMessage(responsePayload.toString());
 
@@ -105,7 +105,6 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
         final Payload payload = new Payload();
 
         if (requestString.isPresent()) {
-            payload.setContentLength(requestString.get().getBytes().length);
             payload.setContent(requestString.get());
         }
 

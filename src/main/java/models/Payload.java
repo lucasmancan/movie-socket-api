@@ -1,29 +1,19 @@
 package models;
 
 public class Payload {
-    private Integer contentLength = 0;
     private String content;
 
     @Override
     public String toString() {
-        return String.format("%d:%s", this.contentLength, this.content);
+        return String.format("%d:%s", this.content.getBytes().length, this.content);
     }
 
-    public Payload(Integer contentLength, String content) {
-        this.contentLength = contentLength;
+    public Payload(String content) {
         this.content = content;
     }
 
     public Payload() {
 
-    }
-
-    public Integer getContentLength() {
-        return contentLength;
-    }
-
-    public void setContentLength(Integer contentLength) {
-        this.contentLength = contentLength;
     }
 
     public String getContent() {
