@@ -78,14 +78,16 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
 
     /**
      * Handle a friendly error to socket client
-     *
+     * For now a default message is sent
      * @param ex
      */
     public void handleError(IOException ex) {
         try {
             OutputStream output = clientSocket.getOutputStream();
 
-            output.write(ex.getMessage().getBytes());
+            final String errorMessage = "%d:An error occurred while processing your request, please check if you are following the protocol";
+
+            output.write(String.format(errorMessage, errorMessage.getBytes().length).getBytes());
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "An Error occurred while processind the client request", e);
