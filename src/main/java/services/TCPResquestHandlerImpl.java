@@ -134,13 +134,13 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
                 } else if (queryLength == -1) {
 
                     if (c == ':') {
-                        queryLength = safeParseToLong(queryLengthSb.toString());
+                        queryLength = safeParseToInteger(queryLengthSb.toString());
                     }
 
                     queryLengthSb.append(c);
                 }
 
-            if (queryContentSb.length() == queryLength)
+            if (queryContentSb.toString().getBytes().length == queryLength)
                 break;
 
             incoming = inputStream.read();
@@ -154,16 +154,16 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
         return Optional.of(queryContentSb.toString());
     }
 
-    private Long safeParseToLong(String queryLength) throws MessageFormatException {
+    private Integer safeParseToInteger(String queryLength) throws MessageFormatException {
         try {
 
-            final Long longValue = Long.parseLong(queryLength);
+            final Integer value = Integer.parseInt(queryLength);
 
-            if(longValue.equals(0L)){
+            if(value.equals(0)){
                 throw new MessageFormatException("The <query> should not be empty, please rewrite your message...");
             }
 
-            return Long.parseLong(queryLength);
+            return Integer.parseInt(queryLength);
         } catch (NumberFormatException e) {
             throw new MessageFormatException("The <query length> is out of 'int' range and is not valid, please rewrite your message...");
         }
