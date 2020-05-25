@@ -28,6 +28,15 @@ All the request must respect the text protocol  (query length):(query)
  - open your windows terminal and type 'telnet localhost 8085'
  - Now that the connection is open, input the size of title and then type the title  you want. (You should respect the text protocol present in details section)
 
+#### Error handling
+
+ If the message doesn't follow the protocol, an error message is sent to the client and the connection is closed.
+ 
+###### Default Errors
+
+    * 63:The <query> should not be empty, please rewrite your message... (when the <query length> parameter is empty>)
+    * 85:The <query> can only have alphanumeric chars and '/:', please rewrite your message... (when the <query> has special chars, except  '/' and ':')
+    * 90:The <query length> is out of 'Long' range and is not valid, please rewrite your message... (when the <query length> has a invalid number)
 
 ### Technologies Used
 

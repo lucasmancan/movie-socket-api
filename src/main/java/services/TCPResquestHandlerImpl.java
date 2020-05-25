@@ -86,9 +86,9 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
         try {
             OutputStream output = clientSocket.getOutputStream();
 
-            final String errorMessage = "%d:An error occurred while processing your request, please check if you are following the protocol";
+//            final String errorMessage = "%d:An error occurred while processing your request, please check if you are following the protocol";
 
-            output.write(String.format(errorMessage, errorMessage.getBytes().length).getBytes());
+            output.write(ex.getMessage().getBytes());
 
         } catch (Exception e) {
             logger.log(Level.SEVERE, "An Error occurred while processind the client request", e);
@@ -119,58 +119,56 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
      * @return message sent by client in String format or null
      */
     private Optional<String> clientInputStreamToString() throws IOException {
-        String requestString = null;
 
-        int incoming = clientSocket.getInputStream().read();
+        final InputStream inputStream = this.clientSocket.getInputStream();
 
-        StringBuilder queryContentSb = new StringBuilder();
-        StringBuilder queryLengthSb = new StringBuilder();
+        final StringBuilder queryContentSb = new StringBuilder();
+        final StringBuilder queryLengthSb = new StringBuilder();
 
         long queryLength = -1;
 
+        int incoming = inputStream.read();
+
         while (incoming != -1) {
             char c = (char) incoming;
-
-            try {
 
                 if (queryLength > -1) {
                     queryContentSb.append(c);
                 } else if (queryLength == -1) {
 
                     if (c == ':') {
-                        queryLength = parseToLong(queryLengthSb.toString());
-                    } else if (!Character.isDigit(c)){
-                        throw new MessageFormatException("The server language is <query length>:query, please rewrite your message...");
+                        queryLength = safeParseToLong(queryLengthSb.toString());
                     }
 
                     queryLengthSb.append(c);
                 }
-            } catch (MessageFormatException e) {
-
-                queryContentSb.setLength(0);
-                queryLengthSb.setLength(0);
-
-                sendMessage(e.getMessage());
-            }
 
             if (queryContentSb.length() == queryLength)
                 break;
 
-            incoming = clientSocket.getInputStream().read();
+            incoming = inputStream.read();
 
         }
 
-        requestString = queryContentSb.toString();
+        if(!queryContentSb.toString().matches("^[a-zA-Z0-9/:]+$")){
+            throw new MessageFormatException("The <query> can only have alphanumeric chars and '/:', please rewrite your message...");
+        }
 
-
-        return Optional.of(requestString);
+        return Optional.of(queryContentSb.toString());
     }
 
-    private Long parseToLong(String queryLength) throws MessageFormatException {
+    private Long safeParseToLong(String queryLength) throws MessageFormatException {
         try {
+
+            final Long longValue = Long.parseLong(queryLength);
+
+            if(longValue.equals(0L)){
+                throw new MessageFormatException("The <query> should not be empty, please rewrite your message...");
+            }
+
             return Long.parseLong(queryLength);
         } catch (NumberFormatException e) {
-            throw new MessageFormatException("The <query length> is out of 'Long' range, please rewrite your message...");
+            throw new MessageFormatException("The <query length> is out of 'Long' range and is not valid, please rewrite your message...");
         }
     }
 

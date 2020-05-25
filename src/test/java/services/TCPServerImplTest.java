@@ -12,6 +12,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.Socket;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 public class TCPServerImplTest {
@@ -52,7 +53,7 @@ public class TCPServerImplTest {
     @Test
     public void shoudMatchToResponsePattern() throws IOException {
 
-        final String query = "teste/*-a'";
+        final String query = "ac/dc";
 
         final String message = String.format("%d:%s", query.getBytes().length, query);
 
@@ -61,6 +62,49 @@ public class TCPServerImplTest {
         final StringBuilder sb = getServerResponse();
 
         assertTrue(sb.toString().matches("(\\d+:.*)"));
+    }
+
+    @Test
+    public void shoudMatchToResponsePatternEmptyQuery() throws IOException {
+
+        final String query = "";
+
+        final String message = String.format("%d:%s", query.getBytes().length, query);
+
+        sendMessageToServer(message);
+
+        final StringBuilder sb = getServerResponse();
+
+        assertEquals("63:The <query> should not be empty, please rewrite your message...", sb.toString());
+    }
+
+
+    @Test
+    public void shoudMatchToResponsePatternInvalidQueryLength() throws IOException {
+
+        final String query = "12312312as1231213:12asdasasdasdas";
+
+        final String message = String.format("%da:%s", query.getBytes().length, query);
+
+        sendMessageToServer(message);
+
+        final StringBuilder sb = getServerResponse();
+
+        assertEquals("90:The <query length> is out of 'Long' range and is not valid, please rewrite your message...", sb.toString());
+    }
+
+    @Test
+    public void shoudMatchToResponsePatternInvalidQueryContent() throws IOException {
+
+        final String query = "ac/*-*asdas:as";
+
+        final String message = String.format("%d:%s", query.getBytes().length, query);
+
+        sendMessageToServer(message);
+
+        final StringBuilder sb = getServerResponse();
+
+        assertEquals("85:The <query> can only have alphanumeric chars and '/:', please rewrite your message...", sb.toString());
     }
 
     private void sendMessageToServer(String message) throws IOException {

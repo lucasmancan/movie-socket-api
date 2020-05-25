@@ -21,8 +21,9 @@ public class MovieServiceImpl implements MovieService {
 
     public List<MovieOption> findAllByTitle(String queryString) throws IOException {
 
-        queryString = URLEncoder.encode(queryString, "UTF-8");
-
+        /*
+        * Jsoup caries about URL encoding
+        * */
         Document doc = Jsoup.connect(String.format(baseUrl, queryString)).get();
 
         // current path of movie information

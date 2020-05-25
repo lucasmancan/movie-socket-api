@@ -24,7 +24,7 @@ public class MovieServiceTest {
 
     @Test
     public void shouldReturnMovieListWithoutErrors() throws IOException {
-       List list = movieService.findAllByTitle("teste");
+       List list = movieService.findAllByTitle("ac/dc");
 
         Assert.assertNotNull(list);
     }
