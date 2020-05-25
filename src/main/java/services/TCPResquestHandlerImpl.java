@@ -132,13 +132,14 @@ public class TCPResquestHandlerImpl implements TCPResquestHandler {
             char c = (char) incoming;
 
             try {
-                if (c == ':') {
-                    queryLength = parseToLong(queryLengthSb.toString());
-                } else if (queryLength > -1) {
+
+                if (queryLength > -1) {
                     queryContentSb.append(c);
                 } else if (queryLength == -1) {
 
-                    if (!Character.isDigit(c)) {
+                    if (c == ':') {
+                        queryLength = parseToLong(queryLengthSb.toString());
+                    } else if (!Character.isDigit(c)){
                         throw new MessageFormatException("The server language is <query length>:query, please rewrite your message...");
                     }
 
