@@ -10,6 +10,7 @@ All the request must respect the text protocol  (query length):(query)
 * query : Request/response content text
 * Default port 8085 (I dont want to conflict with your running process on 8080 ;) ) 
 * Execution 'java -jar movie-socket-api-1.0.jar'
+- The program should give you a list of related titles and close your connection.
 
 ##### Example:
 
@@ -26,8 +27,6 @@ All the request must respect the text protocol  (query length):(query)
  - Run 'mvn test'
  - open your windows terminal and type 'telnet localhost 8085'
  - Now that the connection is open, input the size of title and then type the title  you want. (You should respect the text protocol present in details section)
- - The program should now give you a list of related titles and close your connection.
-
 
 
 ### Technologies Used
